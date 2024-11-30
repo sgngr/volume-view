@@ -5,7 +5,7 @@ Main module
 =======================================
 Version:    0.1
 Author:     Sinan Güngör
-License:    GPL v2
+License:    GPL v3
 """
 
 
@@ -470,10 +470,20 @@ class Shortcuts():
         labelShortcut21=ttk.Label(self.frameShortcuts,text="Export volume data in nrrd-format",font=self.helv10)       
         labelShortcut21.grid(row=2,column=1,padx=(5,10),sticky="w")
 
-        labelShortcut20=ttk.Label(self.frameShortcuts,text="Ctrl+Q / Q",font=self.helv10)       
-        labelShortcut20.grid(row=3,column=0,padx=(10,5),sticky="e")
-        labelShortcut21=ttk.Label(self.frameShortcuts,text="Quit",font=self.helv10)       
-        labelShortcut21.grid(row=3,column=1,padx=(5,10),sticky="w")
+        labelShortcut30=ttk.Label(self.frameShortcuts,text="Ctrl+Up",font=self.helv10)       
+        labelShortcut30.grid(row=3,column=0,padx=(10,5),sticky="e")
+        labelShortcut31=ttk.Label(self.frameShortcuts,text="Scaling up",font=self.helv10)       
+        labelShortcut31.grid(row=3,column=1,padx=(5,10),sticky="w")
+        
+        labelShortcut40=ttk.Label(self.frameShortcuts,text="Ctrl+Down",font=self.helv10)       
+        labelShortcut40.grid(row=4,column=0,padx=(10,5),sticky="e")
+        labelShortcut41=ttk.Label(self.frameShortcuts,text="Scaling down",font=self.helv10)       
+        labelShortcut41.grid(row=4,column=1,padx=(5,10),sticky="w")
+        
+        labelShortcut50=ttk.Label(self.frameShortcuts,text="Ctrl+Q / Q",font=self.helv10)       
+        labelShortcut50.grid(row=5,column=0,padx=(10,5),sticky="e")
+        labelShortcut51=ttk.Label(self.frameShortcuts,text="Quit",font=self.helv10)       
+        labelShortcut51.grid(row=5,column=1,padx=(5,10),sticky="w")
         
         self.root.bind("<Key>",self.key)
         self.root.resizable(False,False)
@@ -529,7 +539,7 @@ class About():
         labelAuthor0.grid(row=3,column=0,sticky="e",padx=(10,3))
         labelAuthor1.grid(row=3,column=1,sticky="w",padx=(0,10))
         labelLicense0=ttk.Label(self.frameAbout,text="License:",font=self.helv9)  
-        labelLicense1=ttk.Label(self.frameAbout,text="GNU General Public License, Version 2",font=self.helv9)
+        labelLicense1=ttk.Label(self.frameAbout,text="GNU General Public License, Version 3",font=self.helv9)
         labelLicense0.grid(row=4,column=0,sticky="e",padx=(10,3))
         labelLicense1.grid(row=4,column=1,sticky="w",padx=(0,10))
         
