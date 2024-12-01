@@ -1,2 +1,2 @@
-pyinstaller --onefile  --windowed volumeView.py
+pyinstaller --onefile  --windowed  --icon="volumeView-icon.png" volumeView.py
 
