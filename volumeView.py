@@ -443,6 +443,7 @@ def shift_off(event):
 class Shortcuts():
     def __init__(self,parent):
         self.root=Toplevel()
+        self.root.iconify()
         self.root.title("Shortcuts")  
 
         self.frameShortcuts=ttk.Frame(self.root)
@@ -499,8 +500,9 @@ class Shortcuts():
         x=X+(W-w)//2
         y=Y+(H-h)//2
         self.root.geometry("{}x{}+{}+{}".format(w,h,x,y))
-        self.root.focus_set()
         self.root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
+        self.root.deiconify()
+        self.root.focus_set()
         
     def key(self,event):
         k = event.keysym
@@ -510,6 +512,8 @@ class Shortcuts():
 class About():
     def __init__(self,parent):
         self.root=Toplevel()
+        self.root.iconify()
+        
         self.root.title("About Volume View")  
 
         self.frameAbout=ttk.Frame(self.root)
@@ -560,8 +564,10 @@ class About():
         y=Y+(H-h)//2
         self.root.geometry("{}x{}+{}+{}".format(w,h,x,y))
         
-        self.root.focus_set()
+        
         self.root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
+        self.root.deiconify()
+        self.root.focus_set()
         
     def key(self,event):
         k = event.keysym
@@ -900,10 +906,12 @@ class VolumeView():
         
         # ------------------------------------------------------ 
         self.gui_root = tk.Tk()
+        self.gui_root.title("Volume View")  
+        self.gui_root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
         self.gui_root.withdraw()
         
     
-        self.gui_root.title("Volume View")  
+        
         
         self.gui_root.event_add('<<ControlOn>>',  '<KeyPress-Control_L>',   '<KeyPress-Control_R>')
         self.gui_root.event_add('<<ControlOff>>', '<KeyRelease-Control_L>', '<KeyRelease-Control_R>')
@@ -941,7 +949,7 @@ class VolumeView():
         
     
  
-        self.gui_root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
+        
         self.gui_root.resizable(False,False)
 
         
@@ -954,6 +962,7 @@ class VolumeView():
         # ------------------------------------------------------
         #  | menuMain               |
         #  | frameCanvas | frameApp |
+        
         
         
         self.menuMain=FrameMenuMain(self.gui_root,app_class=self)
@@ -988,8 +997,11 @@ class VolumeView():
         self.gui_root.columnconfigure(0, weight=1)
         self.gui_root.columnconfigure(1, weight=0)
         # ------------------------------------------------------
-        self.set_geometry()
+        
+        self.gui_root.update()
         self.gui_root.deiconify()
+        self.set_geometry()
+        self.gui_root.focus_force()
         
 
 
