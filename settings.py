@@ -5,7 +5,7 @@ Application settings module
 =======================================
 Version:    0.1
 Author:     Sinan Güngör
-License:    GPL v2
+License:    GPL v3
 """
 
 import os
@@ -17,7 +17,7 @@ class Settings():
         self.file_settings="settings.xml"    
         self.current_directory=None
         self.screen_padding=[10,10,10,50]
-        self.canvas_image_margin=10
+        self.canvas_image_margin=5
         self.wm_title_height=28
         
         if os.path.exists(self.file_settings):

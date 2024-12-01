@@ -5,7 +5,7 @@ Test volume module
 =======================================
 Version:    0.1
 Author:     Sinan Güngör
-License:    GPL v2
+License:    GPL v3
 """
 
 
@@ -14,9 +14,10 @@ import cv2 as cv
 import math
 
 class TestVolume():
-    def __init__(self,dtype):
+    def __init__(self,dtype=np.uint8):
         self.dtype=dtype
         self.volume=None
+        
     def cone(self,minor_radius): 
         """Create a tapered eliptical cone."""
         w=4*minor_radius+1

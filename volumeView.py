@@ -8,8 +8,6 @@ Author:     Sinan Güngör
 License:    GPL v3
 """
 
-
-
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
@@ -18,12 +16,55 @@ from tkinter import font as tkFont
 import platform
 import os
 
-from PIL import  Image, ImageDraw, ImageFont, ImageTk
+from tkinter import filedialog 
+import pathlib
+
 
 from canvas_image import *
- 
- 
- 
+from test_volume import *
+from image_generator import *
+from jm_volume import *
+from settings import *
+
+# ---------------------------------------------------------------------------------------------- 
+        
+ctrl = False
+shift = False
+ctrl_shift = False      
+def ctrl_on(event):
+    global ctrl, shift, ctrl_shift
+    ctrl=True
+    if shift :
+        ctrl_shift=True
+        ctrl=False
+        shift=False
+    else :
+        ctrl_shift=False
+        
+def ctrl_off(event):
+    global ctrl, shift, ctrl_shift
+    ctrl=False
+    ctrl_shift=False
+    
+def shift_on(event):
+    global ctrl, shift, ctrl_shift
+    shift=True
+    if ctrl :
+        ctrl_shift=True
+        ctrl=False
+        shift=False
+    else :
+        ctrl_shift=False
+        
+def shift_off(event):
+    global ctrl, shift, ctrl_shift
+    shift=False
+    ctrl_shift=False  
+
+# ----------------------------------------------------------------------------------------------  
+    
+from PIL import ImageDraw, ImageFont
+
 class CheckButtonNoIndicator(ttk.Checkbutton):
     def __init__(self,parent,**kwargs):
         self.parent=parent
@@ -95,7 +136,6 @@ class CheckButtonNoIndicator(ttk.Checkbutton):
         else :
             self['image']=self.off_image 
  
- 
     def select_image_font(self):
             
         self.fnt = ImageFont.load_default()
@@ -132,8 +172,145 @@ class CheckButtonNoIndicator(ttk.Checkbutton):
                 print("Font found: 'LucidaGrande.ttc'")
             except:
                 print("Font not found: 'LucidaGrande.ttc'")
+    
+# ----------------------------------------------------------------------------------------------    
+    
+class Shortcuts():
+    def __init__(self,parent):
+        self.parent=parent
+        self.root=Toplevel()
+        self.root.state("withdrawn")
+        
+        self.root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
+        self.root.title("Shortcuts")  
 
- 
+        self.frameShortcuts=ttk.Frame(self.root)
+        self.frameShortcuts.grid(row=0,column=0)
+        self.frameShortcuts['relief'] = 'raised'  
+        self.frameShortcuts['padding']=(5,5,5,5)
+        
+        self.helv10 = tkFont.Font(family='Helvetica',size=10, weight='normal')
+       
+        labelShortcut00=ttk.Label(self.frameShortcuts,text="Ctrl+O",font=self.helv10)       
+        labelShortcut00.grid(row=0,column=0,padx=(10,5),sticky="e")
+        labelShortcut01=ttk.Label(self.frameShortcuts,text="Load volume data from file",font=self.helv10)       
+        labelShortcut01.grid(row=0,column=1,padx=(5,10),sticky="w")
+
+        labelShortcut10=ttk.Label(self.frameShortcuts,text="Ctrl+T",font=self.helv10)       
+        labelShortcut10.grid(row=1,column=0,padx=(10,5),sticky="e")
+        labelShortcut11=ttk.Label(self.frameShortcuts,text="Load test volume data",font=self.helv10)       
+        labelShortcut11.grid(row=1,column=1,padx=(5,10),sticky="w")
+        
+        labelShortcut20=ttk.Label(self.frameShortcuts,text="Ctrl+S",font=self.helv10)       
+        labelShortcut20.grid(row=2,column=0,padx=(10,5),sticky="e")
+        labelShortcut21=ttk.Label(self.frameShortcuts,text="Export volume data in nrrd-format",font=self.helv10)       
+        labelShortcut21.grid(row=2,column=1,padx=(5,10),sticky="w")
+
+        labelShortcut30=ttk.Label(self.frameShortcuts,text="Ctrl+Up",font=self.helv10)       
+        labelShortcut30.grid(row=3,column=0,padx=(10,5),sticky="e")
+        labelShortcut31=ttk.Label(self.frameShortcuts,text="Scaling up",font=self.helv10)       
+        labelShortcut31.grid(row=3,column=1,padx=(5,10),sticky="w")
+        
+        labelShortcut40=ttk.Label(self.frameShortcuts,text="Ctrl+Down",font=self.helv10)       
+        labelShortcut40.grid(row=4,column=0,padx=(10,5),sticky="e")
+        labelShortcut41=ttk.Label(self.frameShortcuts,text="Scaling down",font=self.helv10)       
+        labelShortcut41.grid(row=4,column=1,padx=(5,10),sticky="w")
+        
+        labelShortcut50=ttk.Label(self.frameShortcuts,text="Ctrl+Q / Q",font=self.helv10)       
+        labelShortcut50.grid(row=5,column=0,padx=(10,5),sticky="e")
+        labelShortcut51=ttk.Label(self.frameShortcuts,text="Quit",font=self.helv10)       
+        labelShortcut51.grid(row=5,column=1,padx=(5,10),sticky="w")
+        
+        self.root.bind("<Key>",self.key)
+        self.root.resizable(False,False)
+        self.root.attributes('-topmost', True)
+        
+        self.root.update()
+        self.root.deiconify()
+        
+        W=parent.winfo_width()
+        H=parent.winfo_height()
+        X=parent.winfo_x()
+        Y=parent.winfo_y()
+        w=self.root.winfo_width()
+        h=self.root.winfo_height()
+        x=X+(W-w)//2
+        y=Y+(H-h)//2
+        self.root.geometry("{}x{}+{}+{}".format(w,h,x,y))
+        
+        self.root.focus_set()
+        
+    def key(self,event):
+        k = event.keysym
+        if k == 'Escape' :
+            self.root.destroy()
+            self.parent.focus_set()
+
+class About():
+    def __init__(self,parent):
+        self.parent=parent
+        self.root=Toplevel()
+        self.root.state("withdrawn")
+        
+        self.root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
+        self.root.title("About Volume View")
+
+        self.frameAbout=ttk.Frame(self.root)
+        self.frameAbout.grid(row=0,column=0)
+        self.frameAbout['relief'] = 'raised'  
+        self.frameAbout['padding']=(5,5,5,5)
+        
+        self.helv16b = tkFont.Font(family='Helvetica',size=12, weight='bold')
+        self.helv9 = tkFont.Font(family='Helvetica',size=9, weight='normal')
+        self.helv9b = tkFont.Font(family='Helvetica',size=9, weight='bold')
+
+        labelVolumeView=ttk.Label(self.frameAbout,text="Volume View",font=self.helv16b)       
+        labelVolumeView.grid(row=0,column=0,columnspan=2)
+        
+        labelSoftware=ttk.Label(self.frameAbout,text="Volumetric Data Viewer",font=self.helv9)       
+        labelSoftware.grid(row=1,column=0,columnspan=2)
+        
+        labelVersion=ttk.Label(self.frameAbout,text="Version {}".format('0.1'),font=self.helv9)       
+        labelVersion.grid(row=2,column=0,columnspan=2)
+        
+        labelAuthor0=ttk.Label(self.frameAbout,text="Author:",font=self.helv9)  
+        labelAuthor1=ttk.Label(self.frameAbout,text="Sinan Güngör",font=self.helv9)
+        labelAuthor0.grid(row=3,column=0,sticky="e",padx=(10,3))
+        labelAuthor1.grid(row=3,column=1,sticky="w",padx=(0,10))
+        labelLicense0=ttk.Label(self.frameAbout,text="License:",font=self.helv9)  
+        labelLicense1=ttk.Label(self.frameAbout,text="GNU General Public License, Version 3",font=self.helv9)
+        labelLicense0.grid(row=4,column=0,sticky="e",padx=(10,3))
+        labelLicense1.grid(row=4,column=1,sticky="w",padx=(0,10))
+        
+        self.frameAbout.columnconfigure(1,minsize=200)
+        
+        self.root.bind("<Key>",self.key)
+        self.root.resizable(False,False)
+        self.root.attributes('-topmost', True)
+    
+        self.root.update()
+        self.root.deiconify()
+        
+        W=parent.winfo_width()
+        H=parent.winfo_height()
+        X=parent.winfo_x()
+        Y=parent.winfo_y()
+        w=self.root.winfo_width()
+        h=self.root.winfo_height()
+        x=X+(W-w)//2
+        y=Y+(H-h)//2
+        self.root.geometry("{}x{}+{}+{}".format(w,h,x,y))
+        
+        self.root.focus_set()
+        
+    def key(self,event):
+        k = event.keysym
+        if k == 'Escape' :
+            self.root.destroy()
+            self.parent.focus_set()
+    
+# ----------------------------------------------------------------------------------------------
+
 class FrameProcessing(ttk.Frame): 
     def __init__(self, *args, **kwargs):
         
@@ -141,11 +318,15 @@ class FrameProcessing(ttk.Frame):
         if 'image_generator' in kwargs.keys() :
             self.image_generator=kwargs["image_generator"]
         
+        self.canvases=list()
         if 'canvases' in kwargs.keys() :
             self.canvases=kwargs["canvases"]
+            
+        self.index=[0,0,0]
+        if 'index' in kwargs.keys() :
+            self.index=kwargs["index"]
         
-        self.index=self.image_generator.index
-        self.cocanvases=()
+        self.cocanvases=list()
         
         super().__init__(*args)
         self['relief'] = 'sunken'
@@ -165,7 +346,11 @@ class FrameProcessing(ttk.Frame):
         labelTitle['background']='#1e94f1'
         labelTitle['foreground']='white'
 
-        self.varN = tk.BooleanVar(value=self.image_generator.normalize)        
+        self.varN = tk.BooleanVar()
+        if self.image_generator != None :
+            self.varN.set(self.image_generator.normalize)
+        else :
+            self.varN.set(False)
         self.checkButtonN=CheckButtonNoIndicator(self, compound=None, onvalue=True, offvalue=False, takefocus=False,
                       variable=self.varN, command=self.set_normalization)
         self.checkButtonN.grid(row=1,column=0,padx=(0,0),pady=(5,2))
@@ -173,26 +358,38 @@ class FrameProcessing(ttk.Frame):
         labelN=ttk.Label(self,text="Normalization")
         labelN.grid(row=1,column=1,padx=(0,0),pady=(2,0),sticky=(tk.W, tk.N, tk.E, tk.S))
         
-        self.varHE = tk.BooleanVar(value=self.image_generator.equalize_histogram)
+        self.varHE = tk.BooleanVar()
+        if self.image_generator != None :
+            self.varHE.set(self.image_generator.equalize_histogram)
+        else :
+            self.varHE.set(False)
         self.checkButtonHE=CheckButtonNoIndicator(self, compound=None, onvalue=True, offvalue=False, takefocus=False,
                       variable=self.varHE, command=self.set_histrogram_equalization)
         self.checkButtonHE.grid(row=2,column=0,padx=(0,0),pady=(2,2))
         
         labelHE=ttk.Label(self,text="Histogram equalization")
         labelHE.grid(row=2,column=1,padx=(0,0),pady=(2,0),sticky=(tk.W, tk.N, tk.E, tk.S))
-        
+
+    def update_frame(self):
+        self.varN.set(self.image_generator.normalize)
+        self.varHE.set(self.image_generator.equalize_histogram)
+        self.set_normalization()
+        self.set_histrogram_equalization()
+    
     def set_normalization(self):
         if self.checkButtonN.instate(['!disabled', 'selected']):
             self.checkButtonN['image'] = self.checkButtonN.on_image
             if self.image_generator != None :
                 self.image_generator.normalize=True
                 for canvas in self.cocanvases:
+                    print(canvas)
                     canvas.update_canvas(self.index)
         else:
             self.checkButtonN['image'] = self.checkButtonN.off_image
             if self.image_generator != None :
                 self.image_generator.normalize=False
                 for canvas in self.cocanvases:
+                    print(canvas)
                     canvas.update_canvas(self.index)
 
     def set_histrogram_equalization(self):
@@ -209,12 +406,10 @@ class FrameProcessing(ttk.Frame):
                 self.image_generator.equalize_histogram=False
                 for canvas in self.cocanvases:
                     canvas.update_canvas(self.index)
-                
-                
+                                
 class FrameInfo(ttk.Frame):
     def __init__(self, *args, **kwargs):
                 
-        # self.parent=args[0]
         super().__init__(*args)
         
         self['relief'] = 'sunken'
@@ -242,10 +437,6 @@ class FrameInfo(ttk.Frame):
         self.helv10b = tkFont.Font(family='Helvetica',size=10, weight='bold')
         self.helv9b = tkFont.Font(family='Helvetica',size=9, weight='bold')
         
-        # print("Origin",self.origin)
-        # print("Grid size",self.grid_size)
-        # print("Index",self.index)
-
         labelTitle=ttk.Label(self,text="Data probe")
         labelTitle.grid(row=0,column=0,columnspan=3,sticky=(tk.W, tk.N, tk.E, tk.S))
         labelTitle.grid_propagate(0)
@@ -365,10 +556,7 @@ class FrameInfo(ttk.Frame):
         self.labelIntensity1=ttk.Label(self,text="0")
         self.labelIntensity1.grid(row=8,column=0,columnspan=3)
         self.labelIntensity1['padding']=(0,3,0,0)
-        
-        self.update_frame(index)
-
-
+    
     def update_frame(self,index,joint_update=False): 
         self.index=index
         self.z=(self.origin[2]+self.index[2])*self.grid_size[2]
@@ -392,188 +580,12 @@ class FrameInfo(ttk.Frame):
         
         self.labelIntensity1["text"]="{}".format(self.intensity)
 
+class FrameApp(ttk.Frame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args)
+        self['relief'] = 'raised'  
+        self['padding']=(5,5,5,5) 
  
-
-from tkinter import filedialog 
-import pathlib
-
-
-from test_volume import *
-from image_generator import *
-from jm_volume import *
-from settings import *
-
-
-
-        
-ctrl = False
-shift = False
-ctrl_shift = False      
-def ctrl_on(event):
-    global ctrl, shift, ctrl_shift
-    ctrl=True
-    if shift :
-        ctrl_shift=True
-        ctrl=False
-        shift=False
-    else :
-        ctrl_shift=False
-        
-def ctrl_off(event):
-    global ctrl, shift, ctrl_shift
-    ctrl=False
-    ctrl_shift=False
-    
-def shift_on(event):
-    global ctrl, shift, ctrl_shift
-    shift=True
-    if ctrl :
-        ctrl_shift=True
-        ctrl=False
-        shift=False
-    else :
-        ctrl_shift=False
-        
-def shift_off(event):
-    global ctrl, shift, ctrl_shift
-    shift=False
-    ctrl_shift=False  
-    
-
-class Shortcuts():
-    def __init__(self,parent):
-        self.root=Toplevel()
-        self.root.iconify()
-        self.root.title("Shortcuts")  
-
-        self.frameShortcuts=ttk.Frame(self.root)
-        self.frameShortcuts.grid(row=0,column=0)
-        self.frameShortcuts['relief'] = 'raised'  
-        self.frameShortcuts['padding']=(5,5,5,5)
-        
-        self.style = ttk.Style(self.root)
-        self.style.theme_use('clam')
-     
-        self.helv10 = tkFont.Font(family='Helvetica',size=10, weight='normal')
-       
-        labelShortcut00=ttk.Label(self.frameShortcuts,text="Ctrl+O",font=self.helv10)       
-        labelShortcut00.grid(row=0,column=0,padx=(10,5),sticky="e")
-        labelShortcut01=ttk.Label(self.frameShortcuts,text="Load volume data from file",font=self.helv10)       
-        labelShortcut01.grid(row=0,column=1,padx=(5,10),sticky="w")
-
-        labelShortcut10=ttk.Label(self.frameShortcuts,text="Ctrl+T",font=self.helv10)       
-        labelShortcut10.grid(row=1,column=0,padx=(10,5),sticky="e")
-        labelShortcut11=ttk.Label(self.frameShortcuts,text="Load test volume data",font=self.helv10)       
-        labelShortcut11.grid(row=1,column=1,padx=(5,10),sticky="w")
-        
-        labelShortcut20=ttk.Label(self.frameShortcuts,text="Ctrl+S",font=self.helv10)       
-        labelShortcut20.grid(row=2,column=0,padx=(10,5),sticky="e")
-        labelShortcut21=ttk.Label(self.frameShortcuts,text="Export volume data in nrrd-format",font=self.helv10)       
-        labelShortcut21.grid(row=2,column=1,padx=(5,10),sticky="w")
-
-        labelShortcut30=ttk.Label(self.frameShortcuts,text="Ctrl+Up",font=self.helv10)       
-        labelShortcut30.grid(row=3,column=0,padx=(10,5),sticky="e")
-        labelShortcut31=ttk.Label(self.frameShortcuts,text="Scaling up",font=self.helv10)       
-        labelShortcut31.grid(row=3,column=1,padx=(5,10),sticky="w")
-        
-        labelShortcut40=ttk.Label(self.frameShortcuts,text="Ctrl+Down",font=self.helv10)       
-        labelShortcut40.grid(row=4,column=0,padx=(10,5),sticky="e")
-        labelShortcut41=ttk.Label(self.frameShortcuts,text="Scaling down",font=self.helv10)       
-        labelShortcut41.grid(row=4,column=1,padx=(5,10),sticky="w")
-        
-        labelShortcut50=ttk.Label(self.frameShortcuts,text="Ctrl+Q / Q",font=self.helv10)       
-        labelShortcut50.grid(row=5,column=0,padx=(10,5),sticky="e")
-        labelShortcut51=ttk.Label(self.frameShortcuts,text="Quit",font=self.helv10)       
-        labelShortcut51.grid(row=5,column=1,padx=(5,10),sticky="w")
-        
-        self.root.bind("<Key>",self.key)
-        self.root.resizable(False,False)
-        self.root.attributes('-topmost', True)
-        
-        self.root.update()
-        W=parent.winfo_width()
-        H=parent.winfo_height()
-        X=parent.winfo_x()
-        Y=parent.winfo_y()
-        w=self.root.winfo_width()
-        h=self.root.winfo_height()
-        x=X+(W-w)//2
-        y=Y+(H-h)//2
-        self.root.geometry("{}x{}+{}+{}".format(w,h,x,y))
-        self.root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
-        self.root.deiconify()
-        self.root.focus_set()
-        
-    def key(self,event):
-        k = event.keysym
-        if k == 'Escape' :
-            self.root.destroy()
-
-class About():
-    def __init__(self,parent):
-        self.root=Toplevel()
-        self.root.iconify()
-        
-        self.root.title("About Volume View")  
-
-        self.frameAbout=ttk.Frame(self.root)
-        self.frameAbout.grid(row=0,column=0)
-        self.frameAbout['relief'] = 'raised'  
-        self.frameAbout['padding']=(5,5,5,5)
-
-        # self.style = ttk.Style(self.root)
-        # self.style.theme_use('clam')
-     
-        self.helv16b = tkFont.Font(family='Helvetica',size=12, weight='bold')
-        self.helv9 = tkFont.Font(family='Helvetica',size=9, weight='normal')
-        self.helv9b = tkFont.Font(family='Helvetica',size=9, weight='bold')
-
-        labelVolumeView=ttk.Label(self.frameAbout,text="Volume View",font=self.helv16b)       
-        labelVolumeView.grid(row=0,column=0,columnspan=2)
-        
-        labelSoftware=ttk.Label(self.frameAbout,text="Volumetric Data Viewer",font=self.helv9)       
-        labelSoftware.grid(row=1,column=0,columnspan=2)
-        
-        labelVersion=ttk.Label(self.frameAbout,text="Version {}".format('0.1'),font=self.helv9)       
-        labelVersion.grid(row=2,column=0,columnspan=2)
-        
-        
-        labelAuthor0=ttk.Label(self.frameAbout,text="Author:",font=self.helv9)  
-        labelAuthor1=ttk.Label(self.frameAbout,text="Sinan Güngör",font=self.helv9)
-        labelAuthor0.grid(row=3,column=0,sticky="e",padx=(10,3))
-        labelAuthor1.grid(row=3,column=1,sticky="w",padx=(0,10))
-        labelLicense0=ttk.Label(self.frameAbout,text="License:",font=self.helv9)  
-        labelLicense1=ttk.Label(self.frameAbout,text="GNU General Public License, Version 3",font=self.helv9)
-        labelLicense0.grid(row=4,column=0,sticky="e",padx=(10,3))
-        labelLicense1.grid(row=4,column=1,sticky="w",padx=(0,10))
-        
-        self.frameAbout.columnconfigure(1,minsize=200)
-        
-        self.root.bind("<Key>",self.key)
-        self.root.resizable(False,False)
-        self.root.attributes('-topmost', True)
-    
-        self.root.update()
-        W=parent.winfo_width()
-        H=parent.winfo_height()
-        X=parent.winfo_x()
-        Y=parent.winfo_y()
-        w=self.root.winfo_width()
-        h=self.root.winfo_height()
-        x=X+(W-w)//2
-        y=Y+(H-h)//2
-        self.root.geometry("{}x{}+{}+{}".format(w,h,x,y))
-        
-        
-        self.root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
-        self.root.deiconify()
-        self.root.focus_set()
-        
-    def key(self,event):
-        k = event.keysym
-        if k == 'Escape' :
-            self.root.destroy()
-    
 # ----------------------------------------------------------------------------------------------
 
 class FrameCanvas(ttk.Frame): 
@@ -581,16 +593,8 @@ class FrameCanvas(ttk.Frame):
         super().__init__(*args)
         self['relief'] = 'raised'  
         self['padding']=(0,0,0,0)
-   
-class FrameApp(ttk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
-        self['relief'] = 'raised'  
-        self['padding']=(5,5,5,5) 
- 
-# ----------------------------------------------------------------------------------------------   
 
-import time
+# ----------------------------------------------------------------------------------------------   
 
 def mainmenu_label_padding():
     padding=(5,0,5,0)
@@ -604,6 +608,58 @@ def menu_label_padding():
         padding=(5,4,5,0)
     return padding
 
+class FrameMenuHelp(ttk.Frame): 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args)
+    
+        self.app_class=None
+        if 'app_class' in kwargs.keys() :
+            self.app_class=kwargs["app_class"]
+    
+        self.position=(0,0)
+        if 'position' in kwargs.keys() :
+            self.position=kwargs["position"]
+    
+        self['relief'] = 'raised'
+        padding=(5,5,5,5)
+        self["padding"]=(5,5,5,5)
+    
+        self.menuList=list()
+    
+        labelShortcuts=ttk.Label(self,text="Shortcuts", style='Menu.TLabel')
+        labelShortcuts.grid(row=0,column=0,sticky=(tk.W, tk.N, tk.E, tk.S))
+        labelShortcuts["padding"]=menu_label_padding()
+
+        labelAbout=ttk.Label(self,text="About", style='Menu.TLabel')
+        labelAbout.grid(row=1,column=0,sticky=(tk.W, tk.N, tk.E, tk.S))
+        labelAbout["padding"]=menu_label_padding()
+        
+        self.rowconfigure(0,minsize=20)
+        self.rowconfigure(1,minsize=20)    
+        
+        self.place(x=self.position[0],y=self.position[1])
+        
+        labelShortcuts.bind("<Button-1>", self.dialog_shortcuts)
+        labelAbout.bind("<Button-1>", self.dialog_about)
+        
+    def destroy_menus(self):
+        for m in self.menuList:
+            m.destroy()
+            self.menuList.remove(m)
+        
+    def dialog_about(self,event):
+        self.app_class.menuMain.destroy_menus()
+        self.app_class.menuMain.disabled=True
+        about=About(self.app_class.gui_root)
+        self.app_class.gui_root.wait_window(about.root)
+        self.app_class.menuMain.disabled=False
+
+    def dialog_shortcuts(self,event):
+        self.app_class.menuMain.destroy_menus()
+        self.app_class.menuMain.disabled=True
+        shortcuts=Shortcuts(self.app_class.gui_root)
+        self.app_class.gui_root.wait_window(shortcuts.root)
+        self.app_class.menuMain.disabled=False
 
 class FrameMenuTestVolume(ttk.Frame): 
     def __init__(self, *args, **kwargs):
@@ -636,7 +692,6 @@ class FrameMenuTestVolume(ttk.Frame):
         
         self.place(x=self.position[0],y=self.position[1])
         
-
         labelTestVolume1.bind("<Button-1>",self.test_volume_1)
         labelTestVolume2.bind("<Button-1>",self.test_volume_2)
         labelTestVolume3.bind("<Button-1>",self.test_volume_3)
@@ -650,7 +705,6 @@ class FrameMenuTestVolume(ttk.Frame):
     def test_volume_3(self,event):
         self.app_class.create_test_volume('wiki',np.uint8)    
         
-
 class FrameMenuFile(ttk.Frame): 
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
@@ -702,8 +756,8 @@ class FrameMenuFile(ttk.Frame):
         self.labelOpen.bind("<Button-1>", self.open)
         self.labelExport.bind("<Button-1>", self.export)
         
-        self.update()
-
+        self.update_idletasks()
+        # self.update()
         x=self.grid_bbox(0, 0)[2]+padding[0]+padding[1]
         y=self.grid_bbox(0, 2)[1]+padding[1]
         self.positionMenuTest=(x,y)
@@ -719,7 +773,7 @@ class FrameMenuFile(ttk.Frame):
         
     def menu_test_volume(self,event):
         self.destroy_menus()
-        menuTestVolume=FrameMenuTestVolume(app_class=self.app_class,position=self.positionMenuTest) # app_class=self.master
+        menuTestVolume=FrameMenuTestVolume(app_class=self.app_class,position=self.positionMenuTest)
         self.menuList.append(menuTestVolume)
     
     def menu_export(self,event):  
@@ -736,62 +790,6 @@ class FrameMenuFile(ttk.Frame):
     def quit(self,event):
         self.master.quit()
         
-
-
-class FrameMenuHelp(ttk.Frame): 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
-    
-        self.app_class=None
-        if 'app_class' in kwargs.keys() :
-            self.app_class=kwargs["app_class"]
-    
-        self.position=(0,0)
-        if 'position' in kwargs.keys() :
-            self.position=kwargs["position"]
-    
-    
-        self['relief'] = 'raised'
-        padding=(5,5,5,5)
-        self["padding"]=(5,5,5,5)
-    
-        self.menuList=list()
-    
-        labelShortcuts=ttk.Label(self,text="Shortcuts", style='Menu.TLabel')
-        labelShortcuts.grid(row=0,column=0,sticky=(tk.W, tk.N, tk.E, tk.S))
-        labelShortcuts["padding"]=menu_label_padding()
-
-        labelAbout=ttk.Label(self,text="About", style='Menu.TLabel')
-        labelAbout.grid(row=1,column=0,sticky=(tk.W, tk.N, tk.E, tk.S))
-        labelAbout["padding"]=menu_label_padding()
-        
-        self.rowconfigure(0,minsize=20)
-        self.rowconfigure(1,minsize=20)    
-        
-        self.place(x=self.position[0],y=self.position[1])
-        
-        labelShortcuts.bind("<Button-1>", self.dialog_shortcuts)
-        labelAbout.bind("<Button-1>", self.dialog_about)
-        
-    def destroy_menus(self):
-        for m in self.menuList:
-            m.destroy()
-            self.menuList.remove(m)
-        
-    def dialog_about(self,event):
-        self.app_class.menuMain.destroy_menus()
-        self.app_class.menuMain.disabled=True
-        about=About(self.app_class.gui_root)
-        self.app_class.gui_root.wait_window(about.root)
-        self.app_class.menuMain.disabled=False
-
-    def dialog_shortcuts(self,event):
-        self.app_class.menuMain.destroy_menus()
-        self.app_class.menuMain.disabled=True
-        shortcuts=Shortcuts(self.app_class.gui_root)
-        self.app_class.gui_root.wait_window(shortcuts.root)
-        self.app_class.menuMain.disabled=False
-
 class FrameMenuMain(ttk.Frame): 
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
@@ -820,14 +818,12 @@ class FrameMenuMain(ttk.Frame):
         labelFile=ttk.Label(self,text="File", style='Menu.TLabel')
         labelFile.grid(row=0,column=0,sticky=(tk.W, tk.N, tk.E, tk.S))
         labelFile["padding"]=mainmenu_label_padding()
-        # labelFile.bind("<Button-1>", self.menu_file)
         labelFile.bind("<Enter>", self.menu_file)
         
       
         labelHelp=ttk.Label(self,text="Help",style='Menu.TLabel')
         labelHelp.grid(row=0,column=2,sticky=(tk.W, tk.N, tk.E, tk.S))
         labelHelp["padding"]=mainmenu_label_padding()
-        # labelHelp.bind("<Button-1>", self.menu_help)
         labelHelp.bind("<Enter>", self.menu_help)
 
         self.bind("<Button-1>", self.destroy_menus)
@@ -863,7 +859,6 @@ class FrameMenuMain(ttk.Frame):
             m.destroy()
             self.menuList.remove(m)
             
-
 # ---------------------------------------------------------------------------------------------- 
 
 class VolumeView():  
@@ -892,46 +887,33 @@ class VolumeView():
         self.settings=Settings()
         self.settings.print()
         
-        self.scale_ratio=0.7  # Max. wiew
+        self.scale_ratio=0.7  # 1.0 for max. wiew area
         
         # GUI settings
         self.padx_canvasx=(4,8)
         self.pady_canvasx=(8,4)
-        
         self.padx_canvasy=(8,4)
         self.pady_canvasy=(8,4)
-        
         self.padx_canvasz=(8,4)
         self.pady_canvasz=(4,8)
-        
         # ------------------------------------------------------ 
         self.gui_root = tk.Tk()
-        self.gui_root.title("Volume View")  
-        self.gui_root.iconphoto(False,PhotoImage(file='volumeView-icon.png')) 
-        self.gui_root.withdraw()
+        self.gui_root.state("withdrawn")
         
-    
-        
-        
+        self.gui_root.title("Volume View")
+        self.gui_root.iconphoto(False,PhotoImage(file='volumeView-icon.png'))
+        # ---------------------------------------------------
         self.gui_root.event_add('<<ControlOn>>',  '<KeyPress-Control_L>',   '<KeyPress-Control_R>')
         self.gui_root.event_add('<<ControlOff>>', '<KeyRelease-Control_L>', '<KeyRelease-Control_R>')
         self.gui_root.event_add('<<ShiftOn>>',    '<KeyPress-Shift_L>',     '<KeyPress-Shift_R>')
         self.gui_root.event_add('<<ShiftOff>>',   '<KeyRelease-Shift_L>',   '<KeyRelease-Shift_R>')
-
-        # self.gui_root.bind('<<ControlOn>>', lambda e: control_key(True))
-        # self.gui_root.bind('<<ControlOff>>', lambda e: control_key(False))
-        # self.gui_root.bind('<<ShiftOn>>', lambda e: shift_key(True))
-        # self.gui_root.bind('<<ShiftOff>>', lambda e: shift_key(False))
         
         self.gui_root.bind('<<ControlOn>>', ctrl_on)
         self.gui_root.bind('<<ControlOff>>', ctrl_off)
         self.gui_root.bind('<<ShiftOn>>', shift_on)
         self.gui_root.bind('<<ShiftOff>>', shift_off)
-        
-        
-        self.gui_root.bind('<Key>', self.key)
-        
 
+        self.gui_root.bind('<Key>', self.key)
         # ------------------------------------------------------
         self.style = ttk.Style()
         self.style.theme_use('clam')
@@ -943,59 +925,62 @@ class VolumeView():
               background=[
                     ('hover', '#3daee9')],
               foreground=[('hover', 'white')])         
-        
-            
+        # ------------------------------------------------------    
         self.build_gui()
-        
-    
- 
-        
+        # ------------------------------------------------------
         self.gui_root.resizable(False,False)
-
-        
         self.gui_root.mainloop() 
-  
-  
+        
     # ------------------------------------------------------------------------------------------
+ 
     def build_gui(self):
         
         # ------------------------------------------------------
         #  | menuMain               |
         #  | frameCanvas | frameApp |
         
-        
-        
         self.menuMain=FrameMenuMain(self.gui_root,app_class=self)
         self.menuMain.grid(row=0,column=0,columnspan=2)
        
-        
         self.set_max_scale() 
-        self.scale=self.scale_ratio*self.max_scale
+        self.scale=round(self.scale_ratio*self.max_scale,2)
+        print("Scale:",self.scale)
         self.image_generator.scale=self.scale
         self.set_frame_canvas()
-        
         
         self.frameApp = FrameApp(self.gui_root)
         self.frameApp.grid(row=1,column=1,padx=(1,0),pady=(0,0),sticky=(tk.W, tk.N, tk.E, tk.S))
         
-        self.set_frame_info()
+        self.build_frame_info()
+        self.reset_frame_info(self.image_generator.volume,self.image_generator.index,self.origin,self.grid_size)
+        
         self.canvases=list()
-        self.set_frame_processing()
+        
+        self.build_frame_processing()
+        
+        # self.canvases is currently not set!
+        self.reset_frame_processing(self.image_generator, self.image_generator.index,self.canvases)
+        self.frameProcessing.update_frame()
         
         # ------------------------------------------------------
+        
         self.cursorColorX=("green","red")
         self.cursorColorY=("blue","red")
         self.cursorColorZ=("blue","green")
         
         self.set_canvases()
+        # self.canvases is now set!
+        self.reset_frame_processing(self.image_generator, self.image_generator.index,self.canvases)
         self.set_cocanvases()
         self.set_coframes()
         
         # ------------------------------------------------------
+        
         self.gui_root.rowconfigure(0, weight=0)
         self.gui_root.rowconfigure(1, weight=1)
         self.gui_root.columnconfigure(0, weight=1)
         self.gui_root.columnconfigure(1, weight=0)
+        
         # ------------------------------------------------------
         
         self.gui_root.update()
@@ -1003,8 +988,7 @@ class VolumeView():
         self.set_geometry()
         self.gui_root.focus_force()
         
-
-
+    # ------------------------------------------------------------------------------------------  
 
     def resize_gui(self):
         
@@ -1019,10 +1003,10 @@ class VolumeView():
         self.set_geometry()
 
     # ------------------------------------------------------------------------------------------  
-    def set_geometry(self):
-         
-        self.gui_root.update()
     
+    def set_geometry(self):         
+        self.gui_root.update()
+        
         w=self.gui_root.winfo_width()
         h=self.gui_root.winfo_height()
         W = self.gui_root.winfo_screenwidth()-self.settings.screen_padding[0]-self.settings.screen_padding[2]
@@ -1030,10 +1014,10 @@ class VolumeView():
         
         x=(W-w)//2
         y=(H-h)//2
-        # y=self.settings.screen_padding[1]
-   
+
         self.gui_root.geometry("+{}+{}".format(x,y))
         print("Root window geometry: {}x{}+{}+{}".format(w,h,x,y))
+    
     # ------------------------------------------------------------------------------------------    
 
     def set_frame_canvas(self):
@@ -1042,6 +1026,7 @@ class VolumeView():
         self.frameCanvas.grid_propagate(True)
         
     # ------------------------------------------------------------------------------------------
+    
     def set_max_scale(self):
         self.max_width=self.gui_root.winfo_screenwidth()-self.settings.screen_padding[0]-self.settings.screen_padding[2]
         self.max_height=self.gui_root.winfo_screenheight()-self.settings.screen_padding[1]-self.settings.screen_padding[3]
@@ -1099,7 +1084,8 @@ class VolumeView():
         w=w_canvas_frame+w_app_frame+3
         
         self.gui_root.geometry("{}x{}".format(w,h))
-        
+     
+    # ------------------------------------------------------------------------------------------
         
     def reset_canvases(self):
         self.canvasImgX.grid_forget()
@@ -1107,22 +1093,27 @@ class VolumeView():
         self.canvasImgZ.grid_forget()
         self.set_canvases()
         
-    def set_frame_info(self):
-        self.frameInfo=FrameInfo(self.frameApp,volume=self.image_generator.volume,index=self.image_generator.index,origin=self.origin,grid_size=self.grid_size)
+    def build_frame_info(self):    
+        self.frameInfo=FrameInfo(self.frameApp) 
         self.frameInfo.grid(row=0,column=0,pady=(6,0))
-        self.frameInfo.update_frame(self.image_generator.index)
-        
-    def reset_frame_info(self):    
-        self.frameInfo.grid_forget()
-        self.set_frame_info()
-        
-    def set_frame_processing(self):
-        self.frameProcessing=FrameProcessing(self.frameApp,image_generator=self.image_generator,index=self.image_generator.index,canvases=self.canvases)
+      
+    def reset_frame_info(self,volume,index,origin,grid_size):
+        self.frameInfo.volume=volume
+        self.frameInfo.index=index
+        self.frameInfo.origin=origin
+        self.frameInfo.grid_size=grid_size
+        self.frameInfo.update_frame(index)
+      
+    def build_frame_processing(self):
+        self.frameProcessing=FrameProcessing(self.frameApp)
         self.frameProcessing.grid(row=1,column=0,pady=(4,0),sticky="nswe")
-    def reset_frame_processing(self):
-        self.frameProcessing.grid_forget()
-        self.set_frame_processing()
-
+        
+    def reset_frame_processing(self,image_generator,index,canvases):
+        self.frameProcessing.image_generator=image_generator
+        self.frameProcessing.index=index
+        self.frameProcessing.canvases=canvases
+        self.frameProcessing.update_frame()
+    
     def set_cocanvases(self):
          # === Coframes and cocanvases for joint updating ===========
         self.canvasImgX.cocanvases=(self.canvasImgY,self.canvasImgZ)
@@ -1193,11 +1184,15 @@ class VolumeView():
             self.set_max_scale() 
             self.scale_ratio=0.7
             self.resize_gui()
-        
             
-    def create_test_volume(self,test_volume,data_type):
+            self.reset_frame_info(self.image_generator.volume,self.image_generator.index,self.origin,self.grid_size)
+            self.reset_frame_processing(self.image_generator, self.image_generator.index,self.canvases)
+    
+    # ------------------------------------------------------------------------------------------
+            
+    def create_test_volume(self,test_volume,data_type=np.uint8):
         self.menuMain.destroy_menus()            
- 
+
         if test_volume == 'cone' and data_type == np.uint8 :
             self.nrrdfile='test-volume-cone-8bit.nrrd'
         if test_volume == 'cone' and data_type == np.uint16 :
@@ -1232,15 +1227,19 @@ class VolumeView():
         self.origin=(testVol.xMin,testVol.yMin,testVol.zMin)
         self.grid_size=(testVol.xGridSize,testVol.yGridSize,testVol.zGridSize)
     
-        
-        
+
         scale=1.0
         self.image_generator=ImageGenerator(volume,index,flip,scale)  
         self.set_max_scale() 
         self.scale_ratio=0.7
-    
+
         self.resize_gui()
+        self.reset_frame_info(self.image_generator.volume,self.image_generator.index,self.origin,self.grid_size)
+        self.reset_frame_processing(self.image_generator, self.image_generator.index,self.canvases)
         
+
+    # ------------------------------------------------------------------------------------------
+    
     def export(self):
         self.menuMain.destroy_menus()   
         if self.nrrd != None :
@@ -1260,10 +1259,8 @@ class VolumeView():
  
     # ------------------------------------------------------------------------------------------
     
-    def key(self,event):
-        global ctrl, shift, ctrl_shift
+    def key(self,event):        
         k = event.keysym
-        #print(event.keycode, event.keysym, event.state)
         
         if ctrl_shift:
             print('Key: <Ctrl>+<Shift>+{}'.format(k))
@@ -1276,6 +1273,7 @@ class VolumeView():
             
         if k == 'q' or k == 'Q':
             self.quit(None)
+            
         if k == 'Escape' :
             self.menuMain.destroy_menus()       
             
@@ -1293,10 +1291,19 @@ class VolumeView():
             self.scale_ratio+=0.1
             if self.scale_ratio>1.0 :
                 self.scale_ratio=1.0
+            self.scale_ratio=round(self.scale_ratio,1)
             print("Scale ratio:",self.scale_ratio)
             self.resize_gui()
             
-        
+        if ctrl and k == 'Down':
+            print("Scale down")
+            self.scale_ratio-=0.1
+            if self.scale_ratio<0.5 :
+                self.scale_ratio=0.5
+            self.scale_ratio=round(self.scale_ratio,1)
+            print("Scale ratio:",self.scale_ratio)
+            self.resize_gui()
+            
         if ctrl and k == 'Down':
             print("Scale down")
             self.scale_ratio-=0.1
@@ -1304,8 +1311,7 @@ class VolumeView():
                 self.scale_ratio=0.5
             print("Scale ratio:",self.scale_ratio)
             self.resize_gui()
-            
-
+    
         if k == 'c' :
             self.canvasImgX.plot_cursor()
             self.canvasImgY.plot_cursor()
@@ -1315,8 +1321,8 @@ class VolumeView():
             self.canvasImgY.delete_cursor()
             self.canvasImgZ.delete_cursor()   
           
-          
-# ----------------------------------------------------------------------------------------------         
+# ----------------------------------------------------------------------------------------------
+
 #---------------------------------------------------------------
 testVol=TestVolume(np.uint8)
 testVol.cone(100)        

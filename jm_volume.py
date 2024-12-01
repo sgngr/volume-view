@@ -5,7 +5,7 @@ J. Morita volume data module
 =======================================
 Version:    0.1
 Author:     Sinan Güngör
-License:    GPL v2
+License:    GPL v3
 """
 
 import os.path

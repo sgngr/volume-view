@@ -5,7 +5,7 @@ Image generator module
 =======================================
 Version:    0.1
 Author:     Sinan Güngör
-License:    GPL v2
+License:    GPL v3
 """
 
 
@@ -157,29 +157,16 @@ if __name__ == "__main__":
     # ===  Display images ==========
 
     import tkinter as tk
-    
-#     def handle_key(event):
-#                 
-#         i,j,k=index
-#         nz,ny,nx=volume.shape
-#         
-#         ks = event.keysym
-#         print("Key: {k}".format(k=ks))
-#         if ks == 'q' or ks == 'Q':
-#             quit()    
-    
+        
     axis=0
     i,j,k=index
     nz,ny,nx=volume.shape
-    
     
     def key(event):
         
         global axis
         global index
-        global i
-        global j
-        global k
+        global i,j,k
         
         ks=event.keysym
         print("Key:",ks)
@@ -257,10 +244,8 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("Image generator")
     root.bind('<Key>', key)
- 
 
-    
-    # PhotoImage     
+    # PhotoImage !   
     root.imageX=ImageTk.PhotoImage(image=imageX)
     root.imageY=ImageTk.PhotoImage(image=imageY)
     root.imageZ=ImageTk.PhotoImage(image=imageZ)
