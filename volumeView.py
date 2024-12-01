@@ -1195,10 +1195,13 @@ class VolumeView():
 
         if test_volume == 'cone' and data_type == np.uint8 :
             self.nrrdfile='test-volume-cone-8bit.nrrd'
+            self.npyfile='test-volume-cone-8bit.npy'
         if test_volume == 'cone' and data_type == np.uint16 :
             self.nrrdfile='test-volume-cone-16bit.nrrd'
+            self.npyfile='test-volume-cone-16bit.npy'
         if test_volume == 'wiki' and data_type == np.uint8 :
             self.nrrdfile='test-volume-wiki.nrrd'
+            self.npyfile='test-volume-wiki.npy'
  
         testVol=TestVolume(data_type)
         if test_volume=='cone':
@@ -1212,7 +1215,7 @@ class VolumeView():
             flip=(1,1,-1)
             volume=testVol.volume   
             
-        np.save("test-volume.npy", testVol.volume, allow_pickle=False) 
+        np.save(self.npyfile, testVol.volume, allow_pickle=False) 
         
         if testVol.volume.dtype == np.uint8 :
             self.nrrd=NRRD(3,"uint8",(testVol.volume.shape[2],testVol.volume.shape[1],testVol.volume.shape[0]),"raw")
@@ -1247,7 +1250,6 @@ class VolumeView():
             if filePath:
                 print("Volume will be exported as:",filePath) 
                 self.settings.current_directory=pathlib.Path(filePath).parent
-                print
                 self.nrrd.write(filePath)
 
     def quit(self,event):
