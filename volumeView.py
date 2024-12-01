@@ -145,10 +145,10 @@ class CheckButtonNoIndicator(ttk.Checkbutton):
             try:
                 # Segoe UI Symbol
                 self.fnt = ImageFont.truetype("seguisym.ttf", 120)
-                self.fnt = ImageFont.truetype("Symbola.ttf", 120)
-                self.position = (20,-20)
+                self.position = (22,-18)
                 print("Font found: 'seguisym.ttf'")
             except :
+                self.position = (22,-18)
                 print("Font not found: 'seguisym.ttf'")
                 pass
                 
@@ -382,14 +382,12 @@ class FrameProcessing(ttk.Frame):
             if self.image_generator != None :
                 self.image_generator.normalize=True
                 for canvas in self.cocanvases:
-                    print(canvas)
                     canvas.update_canvas(self.index)
         else:
             self.checkButtonN['image'] = self.checkButtonN.off_image
             if self.image_generator != None :
                 self.image_generator.normalize=False
                 for canvas in self.cocanvases:
-                    print(canvas)
                     canvas.update_canvas(self.index)
 
     def set_histrogram_equalization(self):
@@ -1195,13 +1193,10 @@ class VolumeView():
 
         if test_volume == 'cone' and data_type == np.uint8 :
             self.nrrdfile='test-volume-cone-8bit.nrrd'
-            self.npyfile='test-volume-cone-8bit.npy'
         if test_volume == 'cone' and data_type == np.uint16 :
             self.nrrdfile='test-volume-cone-16bit.nrrd'
-            self.npyfile='test-volume-cone-16bit.npy'
         if test_volume == 'wiki' and data_type == np.uint8 :
             self.nrrdfile='test-volume-wiki.nrrd'
-            self.npyfile='test-volume-wiki.npy'
  
         testVol=TestVolume(data_type)
         if test_volume=='cone':
@@ -1215,7 +1210,7 @@ class VolumeView():
             flip=(1,1,-1)
             volume=testVol.volume   
             
-        np.save(self.npyfile, testVol.volume, allow_pickle=False) 
+        np.save("test-volume.npy", testVol.volume, allow_pickle=False) 
         
         if testVol.volume.dtype == np.uint8 :
             self.nrrd=NRRD(3,"uint8",(testVol.volume.shape[2],testVol.volume.shape[1],testVol.volume.shape[0]),"raw")
@@ -1250,6 +1245,7 @@ class VolumeView():
             if filePath:
                 print("Volume will be exported as:",filePath) 
                 self.settings.current_directory=pathlib.Path(filePath).parent
+                print
                 self.nrrd.write(filePath)
 
     def quit(self,event):
