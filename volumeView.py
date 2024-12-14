@@ -27,7 +27,11 @@ from jm_volume import *
 from settings import *
 
 # ---------------------------------------------------------------------------------------------- 
-        
+
+from customized_ttk_widgets import CheckbuttonCustomized
+
+# ----------------------------------------------------------------------------------------------    
+
 ctrl = False
 shift = False
 ctrl_shift = False      
@@ -62,118 +66,6 @@ def shift_off(event):
     ctrl_shift=False  
 
 # ----------------------------------------------------------------------------------------------  
-    
-from PIL import ImageDraw, ImageFont
-
-class CheckButtonNoIndicator(ttk.Checkbutton):
-    def __init__(self,parent,**kwargs):
-        self.parent=parent
-        style = ttk.Style()
-        style.layout(
-            'no_indicator.TCheckbutton',[
-                ('Checkbutton.padding', 
-                    {'sticky': 'nswe', 
-                     'children': [
-                        # ('Checkbutton.indicator', 
-                        #     {'side': 'left', 'sticky': ''}
-                        # ),
-                        ('Checkbutton.focus',
-                            {'side': 'left', 'sticky': 'w', 'children':[
-                                ('Checkbutton.label', {'sticky': 'nswe'})
-                                ]
-                            }
-                        )
-                    ]
-                    }
-                )
-            ]
-         )
-
-        # style.configure('no_indicator.TCheckbutton', background=self.parent.cget("background"))
-        style.configure('no_indicator.TCheckbutton', background=style.configure(".")["background"])
-        
-        def create_off_image(self,border,fill,size):
-            off_border="black"
-            off_fill="#ffaaff"
-            # checkbutton off
-            checkbutton_off = Image.new("RGBA", (134, 134))
-            draw = ImageDraw.Draw(checkbutton_off)
-            draw.rounded_rectangle(
-                [2, 2, 132, 132],
-                radius=16,
-                outline=border,
-                width=6,
-                fill=fill,
-            )
-            self.off_image = ImageTk.PhotoImage(checkbutton_off.resize((size,size), Image.LANCZOS))
-
-        def create_on_image(self,border,fill,check_color,size):
-            checkbutton_on = Image.new("RGBA", (134, 134))
-            draw = ImageDraw.Draw(checkbutton_on)
-            draw.rounded_rectangle(
-                [2, 2, 132, 132],
-                radius=16,
-                fill=fill,
-                outline=border,
-                width=6,
-            )
-            
-            self.select_image_font()
-            
-            indicator = "✓"
-            draw.text(self.position, indicator, font=self.fnt, fill=check_color)
-            self.on_image = ImageTk.PhotoImage(checkbutton_on.resize((size,size), Image.LANCZOS))
-
-        # fill=self.parent.cget("background")
-        fill=style.configure(".")["background"]
-        create_off_image(self,border="black",fill=fill,size=13)
-        create_on_image(self,border="black",fill="green",check_color="white",size=13)
-        
-        super().__init__(self.parent,**kwargs, image=self.off_image, style='no_indicator.TCheckbutton')
-        
-        if self.instate(['!disabled', 'selected']):
-            self['image']=self.on_image
-        else :
-            self['image']=self.off_image 
- 
-    def select_image_font(self):
-            
-        self.fnt = ImageFont.load_default()
-        self.position = (0,0)  
-            
-        if platform.system() == 'Windows':
-            try:
-                # Segoe UI Symbol
-                self.fnt = ImageFont.truetype("seguisym.ttf", 120)
-                self.position = (22,-18)
-                print("Font found: 'seguisym.ttf'")
-            except :
-                self.position = (22,-18)
-                print("Font not found: 'seguisym.ttf'")
-                pass
-                
-        if platform.system() == 'Linux' :
-            try:
-                self.fnt = ImageFont.truetype("FreeSerif.ttf", 130)
-                self.position = (18,10)
-                print("Font found: 'FreeSerif.ttf'")
-            except:
-                try:
-                    self.fnt = ImageFont.truetype("DejaVuSans.ttf", 160)
-                    self.position = (2,-24)
-                    print("Font found: 'DejaVuSans.ttf'")
-                except:
-                    print("Fonts not found: 'FreeSerif.ttf', 'DejaVuSans.ttf'")
-                    
-        if platform.system() == 'Darwin' :
-            try: 
-                self.fnt = ImageFont.truetype("LucidaGrande.ttc", 120)
-                self.position = (0,-10) 
-                print("Font found: 'LucidaGrande.ttc'")
-            except:
-                print("Font not found: 'LucidaGrande.ttc'")
-    
-# ----------------------------------------------------------------------------------------------    
     
 class Shortcuts():
     def __init__(self,parent):
@@ -334,76 +226,72 @@ class FrameProcessing(ttk.Frame):
         
         self.helv10b = tkFont.Font(family='Helvetica',size=10, weight='bold')
         self.helv9b = tkFont.Font(family='Helvetica',size=9, weight='bold')
-        self.columnconfigure(0,weight=1)
-        self.columnconfigure(1,weight=100)
-        # print(self.style.configure('TCheckbutton'))
-            
+        self.columnconfigure(0,weight=100)
+   
         labelTitle=ttk.Label(self,text="Image procesing")
-        labelTitle.grid(row=0,column=0,columnspan=3,sticky=(tk.W, tk.N, tk.E, tk.S))
+        labelTitle.grid(row=0,column=0,sticky=(tk.W, tk.N, tk.E, tk.S))
         labelTitle.grid_propagate(0)
         labelTitle['font']=self.helv10b
         labelTitle['anchor']=tk.CENTER
         labelTitle['background']='#1e94f1'
         labelTitle['foreground']='white'
 
+
+        indicatormargin=(0,0,4,3)
+        padding=(5,4,0,0)
+        
+        if self.tk.call('tk','windowingsystem')  == 'win32' :
+            indicatormargin=(0,1,4,0)
+            padding=(5,2,0,2)
+        
+
         self.varN = tk.BooleanVar()
         if self.image_generator != None :
             self.varN.set(self.image_generator.normalize)
         else :
             self.varN.set(False)
-        self.checkButtonN=CheckButtonNoIndicator(self, compound=None, onvalue=True, offvalue=False, takefocus=False,
-                      variable=self.varN, command=self.set_normalization)
-        self.checkButtonN.grid(row=1,column=0,padx=(0,0),pady=(5,2))
-        
-        labelN=ttk.Label(self,text="Normalization")
-        labelN.grid(row=1,column=1,padx=(0,0),pady=(2,0),sticky=(tk.W, tk.N, tk.E, tk.S))
-        
+        self.checkButtonN=CheckbuttonCustomized(self, compound=None, onvalue=True, offvalue=False, takefocus=False,
+                      variable=self.varN, command=self.set_normalization, text="Normalization", indicatorsize=14, indicatorborder="#3daee9", indicatorcheck="#3daee9", indicatormargin=indicatormargin, padding=padding)
+        self.checkButtonN.grid(row=1,column=0,padx=(0,0),pady=(5,0),sticky=tk.NSEW)
+                
         self.varHE = tk.BooleanVar()
         if self.image_generator != None :
             self.varHE.set(self.image_generator.equalize_histogram)
         else :
             self.varHE.set(False)
-        self.checkButtonHE=CheckButtonNoIndicator(self, compound=None, onvalue=True, offvalue=False, takefocus=False,
-                      variable=self.varHE, command=self.set_histrogram_equalization)
-        self.checkButtonHE.grid(row=2,column=0,padx=(0,0),pady=(2,2))
+        self.checkButtonHE=CheckbuttonCustomized(self, compound=None, onvalue=True, offvalue=False, takefocus=False,
+                      variable=self.varHE, command=self.set_histrogram_equalization, text="Histogram equalization", indicatorsize=14, indicatorborder="#3daee9", indicatorcheck="#3daee9", indicatormargin=indicatormargin, padding=padding)
+        self.checkButtonHE.grid(row=2,column=0,padx=(0,0),pady=(0,0),sticky=tk.NSEW)
         
-        labelHE=ttk.Label(self,text="Histogram equalization")
-        labelHE.grid(row=2,column=1,padx=(0,0),pady=(2,0),sticky=(tk.W, tk.N, tk.E, tk.S))
-
-    def update_frame(self):
+    def update_frame(self,index):
+        self.index=index
         self.varN.set(self.image_generator.normalize)
         self.varHE.set(self.image_generator.equalize_histogram)
-        self.set_normalization()
-        self.set_histrogram_equalization()
+   
     
     def set_normalization(self):
-        if self.checkButtonN.instate(['!disabled', 'selected']):
-            self.checkButtonN['image'] = self.checkButtonN.on_image
+        if self.varN.get() :
             if self.image_generator != None :
                 self.image_generator.normalize=True
                 for canvas in self.cocanvases:
-                    canvas.update_canvas(self.index)
-        else:
-            self.checkButtonN['image'] = self.checkButtonN.off_image
+                    canvas.update_canvas(self.index, joint_update=False)
+        else :
             if self.image_generator != None :
                 self.image_generator.normalize=False
                 for canvas in self.cocanvases:
-                    canvas.update_canvas(self.index)
+                    canvas.update_canvas(self.index, joint_update=False)
 
     def set_histrogram_equalization(self):
-        if self.checkButtonHE.instate(['!disabled', 'selected']):
-            self.checkButtonHE['image'] = self.checkButtonHE.on_image
+        if self.varHE.get() :
             if self.image_generator != None :
                 self.image_generator.equalize_histogram=True
                 for canvas in self.cocanvases:
-                    canvas.update_canvas(self.index)
-                
-        else:
-            self.checkButtonHE['image'] = self.checkButtonHE.off_image
+                    canvas.update_canvas(self.index, joint_update=False)                
+        else :
             if self.image_generator != None :
                 self.image_generator.equalize_histogram=False
                 for canvas in self.cocanvases:
-                    canvas.update_canvas(self.index)
+                    canvas.update_canvas(self.index, joint_update=False)
                                 
 class FrameInfo(ttk.Frame):
     def __init__(self, *args, **kwargs):
@@ -958,7 +846,7 @@ class VolumeView():
         
         # self.canvases is currently not set!
         self.reset_frame_processing(self.image_generator, self.image_generator.index,self.canvases)
-        self.frameProcessing.update_frame()
+        self.frameProcessing.update_frame(self.image_generator.index)
         
         # ------------------------------------------------------
         
@@ -1110,7 +998,7 @@ class VolumeView():
         self.frameProcessing.image_generator=image_generator
         self.frameProcessing.index=index
         self.frameProcessing.canvases=canvases
-        self.frameProcessing.update_frame()
+        self.frameProcessing.update_frame(index)
     
     def set_cocanvases(self):
          # === Coframes and cocanvases for joint updating ===========
@@ -1119,9 +1007,9 @@ class VolumeView():
         self.canvasImgZ.cocanvases=(self.canvasImgX,self.canvasImgY)
         self.frameProcessing.cocanvases=(self.canvasImgX,self.canvasImgY,self.canvasImgZ)
     def set_coframes(self):
-        self.canvasImgX.coframes=(self.frameInfo,)
-        self.canvasImgY.coframes=(self.frameInfo,)
-        self.canvasImgZ.coframes=(self.frameInfo,)
+        self.canvasImgX.coframes=(self.frameInfo,self.frameProcessing)
+        self.canvasImgY.coframes=(self.frameInfo,self.frameProcessing)
+        self.canvasImgZ.coframes=(self.frameInfo,self.frameProcessing)
 
     # ------------------------------------------------------------------------------------------
 
@@ -1134,6 +1022,7 @@ class VolumeView():
             extension=pathlib.Path(filePath).suffix
             stem=pathlib.Path(filePath).stem
             self.nrrdfile=stem+'.nrrd'
+            self.npyfile=stem+'.npy'
             self.settings.current_directory=pathlib.Path(filePath).parent
             
             if extension == '.npy' :
@@ -1177,6 +1066,8 @@ class VolumeView():
                 self.origin=(jmVol.xMin,jmVol.yMin,jmVol.zMin)
                 self.grid_size=(jmVol.xGridSize,jmVol.yGridSize,jmVol.zGridSize)
                 
+                np.save(self.npyfile, jmVol.volume, allow_pickle=False) 
+                
             scale=1.0
             self.image_generator=ImageGenerator(volume,index,flip,scale)  
             self.set_max_scale() 
@@ -1193,10 +1084,13 @@ class VolumeView():
 
         if test_volume == 'cone' and data_type == np.uint8 :
             self.nrrdfile='test-volume-cone-8bit.nrrd'
+            self.npyfile='test-volume-cone-8bit.npy'
         if test_volume == 'cone' and data_type == np.uint16 :
             self.nrrdfile='test-volume-cone-16bit.nrrd'
+            self.npyfile='test-volume-cone-16bit.npy'
         if test_volume == 'wiki' and data_type == np.uint8 :
             self.nrrdfile='test-volume-wiki.nrrd'
+            self.npyfile='test-volume-wiki.npy'
  
         testVol=TestVolume(data_type)
         if test_volume=='cone':
@@ -1210,7 +1104,7 @@ class VolumeView():
             flip=(1,1,-1)
             volume=testVol.volume   
             
-        np.save("test-volume.npy", testVol.volume, allow_pickle=False) 
+        np.save(self.npyfile, testVol.volume, allow_pickle=False) 
         
         if testVol.volume.dtype == np.uint8 :
             self.nrrd=NRRD(3,"uint8",(testVol.volume.shape[2],testVol.volume.shape[1],testVol.volume.shape[0]),"raw")
